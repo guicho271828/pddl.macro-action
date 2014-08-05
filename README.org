@@ -1,0 +1,40 @@
+
+* Pddl.Macro-Action 
+
+** Usage
+
+** Dependencies
+
+This library is at least tested on implementation listed below:
+
++ SBCL 1.2.1 on X86-64 Linux  3.11.0-26-generic (author's environment)
+
+Also, it depends on the following libraries:
+
++ ITERATE by  ::
+    Jonathan Amsterdam's iterator/gatherer/accumulator facility
+
++ ALEXANDRIA by  ::
+    Alexandria is a collection of portable public domain utilities.
+
++ PDDL by guicho ::
+    PDDL parser
+
++ OPTIMA by Tomohiro Matsuyama ::
+    Optimized Pattern Matching Library
+
+
+
+** Installation
+
+
+** Author
+
++ guicho
+
+* Copyright
+
+Copyright (c) 2014 guicho
+
+
+
