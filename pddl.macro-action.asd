@@ -23,7 +23,9 @@
   :depends-on (:iterate :alexandria :pddl :optima)
   :components ((:module "src"
                 :components
-                ((:file "package"))))
+                ((:file "package")
+                 (:file "merge-ground-actions"))
+                :serial t))
   :description ""
   
   :long-description

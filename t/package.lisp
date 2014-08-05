@@ -6,8 +6,11 @@
 (in-package :cl-user)
 (defpackage :pddl.macro-action.test
   (:use :cl
+        :iterate
+        :pddl
         :pddl.macro-action
-        :fiveam))
+        :fiveam)
+  (:shadow :maximize :minimize))
 (in-package :pddl.macro-action.test)
 
 
@@ -18,7 +21,4 @@
 ;; run test with (run! test-name) 
 ;;   test as you like ...
 
-(test pddl.macro-action
-
-  )
 
