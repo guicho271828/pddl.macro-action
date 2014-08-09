@@ -59,10 +59,13 @@ actions ga1 and ga2, where ga1 is followed by ga2. "
 
 (defun dereference-parameter (p)
   (ematch p
-    ((pddl-object domain name type)
+    ((pddl-object domain type)
      (cons p
            (pddl-variable :domain domain
-                          :name (gensym (symbol-name name))
+                          :name (gensym
+                                 (concatenate
+                                  'string "?"
+                                  (symbol-name (name type))))
                           :type type)))))
 
 (defun dereference-predicates (alist fs)
