@@ -6,11 +6,15 @@
   ((actions :type list :initarg :actions :initform nil)))
 
 (defun macro-action (actions)
-  (change-class 
-   (dereference-action (reduce #'merge-ground-actions actions))
-   'macro-action
-   :actions (map 'list #'dereference-action actions)))
-    
+  "Merge the given ground-action, dereference them, then re-instantiate as
+a macro-action"
+  (multiple-value-bind (result alist)
+      (dereference-action (reduce #'merge-ground-actions actions))
+    (change-class result 'macro-action
+                  :actions (map 'list (lambda (a)
+                                        (dereference-action a alist))
+                                actions))))
+
 (defun merge-ground-actions (ga1 ga2)
   "Reference implimatation as in Macro-FF paper, Botea et. al., JAIR 2005, Figure 8.
 Creates a new ground-action that is a result of merging consequtive two
@@ -78,7 +82,7 @@ actions ga1 and ga2, where ga1 is followed by ga2. "
         :name name :type type
         :parameters (mapcar #'var parameters))))))
 
-(defun dereference-action (ga)
+(defun dereference-action (ga &optional default-alist)
   (flet ((w/not (list) (mapcar (lambda (x) `(not ,x)) list)))
     (ematch ga
       ((pddl-ground-action domain
@@ -87,19 +91,26 @@ actions ga1 and ga2, where ga1 is followed by ga2. "
                            positive-preconditions
                            add-list
                            delete-list)
-       (let ((alist (dereference-parameters parameters)))
-         (pddl-action
-          :domain domain
-          :name name
-          :parameters (mapcar #'cdr alist)
-          :precondition `(and
-                          ,@(dereference-predicates
-                             alist positive-preconditions))
-          ;; do not assume action-costs currently
-          :effect
-          `(and ,@(dereference-predicates alist add-list)
-                ,@(w/not (dereference-predicates alist delete-list))
-                ,@(dereference-assign-ops alist assign-ops))))))))
+       (let ((alist
+              (if default-alist
+                  (remove-if (lambda (o)
+                               (not (member o parameters)))
+                             default-alist :key #'car)
+                  (dereference-parameters parameters)))) 
+         (values
+          (pddl-action
+           :domain domain
+           :name name
+           :parameters (mapcar #'cdr alist)
+           :precondition `(and
+                           ,@(dereference-predicates
+                              alist positive-preconditions))
+           ;; do not assume action-costs currently
+           :effect
+           `(and ,@(dereference-predicates alist add-list)
+                 ,@(w/not (dereference-predicates alist delete-list))
+                 ,@(dereference-assign-ops alist assign-ops)))
+          (or default-alist alist)))))))
 
 (defun dereference-assign-ops (alist ground-assign-ops)
   (mapcar (curry #'derefernence-assign-op alist) ground-assign-ops))
