@@ -116,7 +116,7 @@ actions ga1 and ga2, where ga1 is followed by ga2. "
           (or default-alist alist)))))))
 
 (defun dereference-assign-ops (alist ground-assign-ops)
-  (mapcar (curry #'derefernence-assign-op alist) ground-assign-ops))
+  (mapcar (curry #'dereference-assign-op alist) ground-assign-ops))
 
 (defun dereference-assign-op (alist ground-assign-op)
   (ematch ground-assign-op
