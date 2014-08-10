@@ -1,7 +1,7 @@
 
 (in-package :pddl.macro-action)
 
-(defclass macro-action (pddl-action)
+(define-pddl-class macro-action (pddl-action)
   ((actions :type list :initarg :actions :initform nil)))
 
 (defun macro-action (actions)
