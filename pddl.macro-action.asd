@@ -24,7 +24,9 @@
   :components ((:module "src"
                 :components
                 ((:file "package")
-                 (:file "merge-ground-actions"))
+                 (:file "merge-ground-actions")
+                 (:file "dereference")
+                 (:file "macro-action"))
                 :serial t))
   :description ""
   
