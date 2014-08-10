@@ -26,7 +26,8 @@
                 ((:file "package")
                  (:file "merge-ground-actions")
                  (:file "dereference")
-                 (:file "macro-action"))
+                 (:file "macro-action")
+                 (:file :decoding))
                 :serial t))
   :description ""
   
