@@ -20,7 +20,7 @@
   :author "guicho"
   :mailto ""
   :license ""
-  :depends-on (:iterate :alexandria :pddl :optima)
+  :depends-on (:iterate :alexandria :pddl :optima :guicho-utilities)
   :components ((:module "src"
                 :components
                 ((:file "package")

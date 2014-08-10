@@ -7,6 +7,7 @@
 (defpackage :pddl.macro-action.test
   (:use :cl
         :iterate
+        :alexandria
         :pddl
         :pddl.macro-action
         :fiveam)
