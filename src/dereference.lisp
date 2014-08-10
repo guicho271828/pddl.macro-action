@@ -6,7 +6,7 @@
 
 (defun dereference-parameter (p)
   (ematch p
-    ((pddl-object domain type)
+    ((pddl-variable domain type) ;; the p might be a pddl-object or a pddl-constant
      (cons p
            (pddl-variable :domain domain
                           :name (gensym
