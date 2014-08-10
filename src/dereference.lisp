@@ -43,10 +43,8 @@
                            delete-list)
        (let ((alist
               (if default-alist
-                  (remove-if (lambda (o)
-                               (not (member o parameters)))
-                             default-alist :key #'car)
-                  (dereference-parameters parameters)))) 
+                  (mapcar (lambda (o) (assoc o default-alist)) parameters)
+                  (dereference-parameters parameters))))
          (values
           (pddl-action
            :domain domain
