@@ -36,8 +36,8 @@ of (object . variable)."
 (defun decode-plan (macro plan)
   (match plan
     ((pddl-plan actions)
-     (shallow-copy
-      plan :actions
+     (pddl-plan ; newly create a pddl-plan, not shallow-copy, so that it
+      :actions  ; uses the special binding of *domain* and *problem*
       (apply #'concatenate 'vector
              (map 'list (curry #'decode-action macro) actions))))))
 
