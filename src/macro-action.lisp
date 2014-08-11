@@ -8,13 +8,14 @@
   "Merge the given ground-action, dereference them, then re-instantiate as
 a macro-action. The secondary value `alist' is an association list
 of (object . variable)."
-  (multiple-value-bind (result alist)
-      (dereference-action (reduce #'merge-ground-actions actions))
-    (values
-     (change-class result 'macro-action
-                   :actions (map 'list (lambda (a)
-                                         (dereference-action a alist))
-                                 actions))
-     alist)))
+  (unless (zerop (length actions))
+    (multiple-value-bind (result alist)
+        (dereference-action (reduce #'merge-ground-actions actions))
+      (values
+       (change-class result 'macro-action
+                     :actions (map 'list (lambda (a)
+                                           (dereference-action a alist))
+                                   actions))
+       alist))))
 
 
