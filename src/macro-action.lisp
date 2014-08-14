@@ -7,7 +7,7 @@
 (defun macro-action (actions)
   "Merge the given ground-action, dereference them, then re-instantiate as
 a macro-action. The secondary value `alist' is an association list
-of (object . variable)."
+of (object . variable). If the argument `actions' is #(), returns nil."
   (unless (zerop (length actions))
     (multiple-value-bind (result alist)
         (dereference-action (reduce #'merge-ground-actions actions))
