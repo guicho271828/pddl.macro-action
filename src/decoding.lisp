@@ -15,7 +15,7 @@
           (iter (for a in actions)
                 (collecting
                  (ground-action a (mapcar #'obj (parameters a)))))))
-       (_ (list ground-action))))))
+       ((macro-action) (list ground-action))))))
 
 (defun decode-plan (macro plan)
   (match plan
