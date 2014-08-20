@@ -12,7 +12,7 @@
 
 (define (problem logistics-prob)
   (:domain logistics)
-  (:objects t1 a b c)
+  (:objects t1 a b c d)
   (:init (truck t1) (at t1 a) (connected a b) (connected b c))
   (:goal (at t1 c)))
 
@@ -74,7 +74,8 @@
 (test (ignore-environment :fixture check-macro)
   (let ((env-obj (list (object *problem* :a)
                        (object *problem* :b)
-                       (object *problem* :c))))
+                       (object *problem* :c)
+                       (object *problem* :d))))
     (multiple-value-bind (m alist)
         (macro-action (list ga1 ga2) env-obj)
       (print m)
@@ -82,6 +83,8 @@
       (is (= 1 (length (parameters m))))
       (is (= 4 (length alist)))
       (print (actions m))
+      (is (= 3 (length (originals m))))
+      (is (= 3 (length (constants m))))
       (iter (for pa in (actions m)) ; partial action
             (is (= 3 (length (parameters pa)))))
       (let* ((truck (object *problem* :t1))
@@ -91,17 +94,17 @@
                :constants (append (mapcar (lambda (x) (cdr (assoc x alist)))
                                           env-obj)
                                   (constants *domain*))))
-             (gm (ground-action m (list truck))))
-        (let ((decoded-actions (pddl.macro-action::decode-action m gm)))
-          (print decoded-actions)
-          (is (= 2 (length decoded-actions)))
-          (is (set-equal result
-                         (reduce (inv #'apply-ground-action)
-                                 decoded-actions
-                                 :initial-value (init *problem*))
-                         :test #'eqstate))
-          (let ((plan (pddl-plan :actions (vector gm))))
-            (is (= 2 (length (actions (decode-plan m plan)))))))))))
+             (gm (ground-action m (list truck)))
+             (decoded-actions (pddl.macro-action::decode-action m gm))
+             (plan (pddl-plan :actions (vector gm))))
+        (print decoded-actions)
+        (is (= 2 (length decoded-actions)))
+        (is (set-equal result
+                       (reduce (inv #'apply-ground-action)
+                               decoded-actions
+                               :initial-value (init *problem*))
+                       :test #'eqstate))
+        (is (= 2 (length (actions (decode-plan m plan)))))))))
 
 
 (defun tt ()

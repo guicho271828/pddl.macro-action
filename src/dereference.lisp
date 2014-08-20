@@ -15,10 +15,8 @@
 
 (defun dereference-parameters (objs ignored) ; -> alist
   (append
-   (mapcar (lambda (o) (cons o (change-class
-                                (shallow-copy o)
-                                'pddl-constant)))
-           ignored)
+   (mapcar #'dereference-parameter-as-constant
+           (intersection objs ignored))
    (mapcar #'dereference-parameter
            (set-difference objs ignored))))
 
@@ -33,6 +31,9 @@
                                   'string "?"
                                   (symbol-name (name type))))
                           :type type)))))
+
+(defun dereference-parameter-as-constant (o)
+  (cons o (change-class (shallow-copy o) 'pddl-constant)))
 
 (defun dereference-predicates (alist fs)
   (mapcar (curry #'dereference-predicate alist) fs))
