@@ -8,8 +8,8 @@
 (defun macro-action (actions &optional ign/objs)
   "Merge the given ground-action, dereference them, then re-instantiate as
 a macro-action. The secondary value `alist' is an association list
-of (object . variable), (constant . variable) -- if objects are not in the ignore list,
- (object . constant) or (constant . constant) -- if they are in the ignore list.
+of (object . variable) or (constant . variable) if objects are not in the ignore list,
+ and (object . constant) or (constant . constant) if they are in the ignore list.
 If the argument `actions' is #(), returns nil."
   (unless (zerop (length actions))
     (multiple-value-bind (result alist)
@@ -29,5 +29,15 @@ If the argument `actions' is #(), returns nil."
 
 
 (defmethod constants ((m macro-action))
-  (remove-if-not (lambda (x) (typep x 'pddl-constant))
-                 (alist m)))
+  "Return a list of constants that should be introduced in the enhanced
+domain due to the object grounding."
+  (mapcar #'cdr
+          (remove-if-not (lambda (x) (typep x 'pddl-constant))
+                         (alist m) :key #'cdr)))
+
+(defun originals (m)
+  "Return a list of objects and constants that should be moved from the
+problem to the enhanced domain due to the object grounding."
+  (mapcar #'car
+          (remove-if-not (lambda (x) (typep x 'pddl-constant))
+                         (alist m) :key #'cdr)))

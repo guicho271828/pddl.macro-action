@@ -11,7 +11,8 @@
   (:export
    :merge-ground-actions
    :macro-action
-   :decode-plan))
+   :decode-plan
+   :originals))
 (in-package :pddl.macro-action)
 
 ;; blah blah blah.
