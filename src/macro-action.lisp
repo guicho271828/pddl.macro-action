@@ -8,8 +8,9 @@
 (defun macro-action (actions &optional ign/objs)
   "Merge the given ground-action, dereference them, then re-instantiate as
 a macro-action. The secondary value `alist' is an association list
-of (object . variable) or (object . constant). If the argument `actions' is
-#(), returns nil."
+of (object . variable), (constant . variable) -- if objects are not in the ignore list,
+ (object . constant) or (constant . constant) -- if they are in the ignore list.
+If the argument `actions' is #(), returns nil."
   (unless (zerop (length actions))
     (multiple-value-bind (result alist)
         (handler-bind ((warning #'muffle-warning))
@@ -27,3 +28,6 @@ of (object . variable) or (object . constant). If the argument `actions' is
        alist))))
 
 
+(defmethod constants ((m macro-action))
+  (remove-if-not (lambda (x) (typep x 'pddl-constant))
+                 (alist m)))
