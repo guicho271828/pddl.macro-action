@@ -1,13 +1,32 @@
 
 (in-package :pddl.macro-action)
 
-(defun dereference-parameters (params) ; -> alist
-  (mapcar #'dereference-parameter params))
+;; alist type is
+;; (object . variable), (constant . variable), (not in ignore list)
+;; (object . constant) or (constant . constant), (in ignore list)
 
-(defun dereference-parameter (p)
-  (ematch p
-    ((pddl-variable domain type) ;; the p might be a pddl-object or a pddl-constant
-     (cons p
+;; the car is always the original grouded parameter that was found in the
+;; template plan. Therefore, they can be both an object or an constant.
+;; In either case, if they are not ignored, they become variables.
+
+;; if they are ignored, they are converted into a constant in the new
+;; domain.
+;; when (constant . constant), then they are NOT eq.
+
+(defun dereference-parameters (objs ignored) ; -> alist
+  (append
+   (mapcar (lambda (o) (cons o (change-class
+                                (shallow-copy o)
+                                'pddl-constant)))
+           ignored)
+   (mapcar #'dereference-parameter
+           (set-difference objs ignored))))
+
+(defun dereference-parameter (o)
+  (ematch o
+    ((pddl-variable domain type)
+     ;; the o might be a pddl-object or a pddl-constant
+     (cons o
            (pddl-variable :domain domain
                           :name (gensym
                                  (concatenate
@@ -19,8 +38,9 @@
   (mapcar (curry #'dereference-predicate alist) fs))
 (defun dereference-predicate (alist f)
   (flet ((var (o)
+           ;; it is called var, but actually it may return the ignored
+           ;; objects
            (or (when-let ((pair (assoc o alist))) (cdr pair))
-               (when (typep o 'pddl-constant) o)
                (error "Parameter ~a not found" o))))
     (match f
       ((pddl-atomic-state name parameters)
@@ -32,7 +52,9 @@
         :name name :type type
         :parameters (mapcar #'var parameters))))))
 
-(defun dereference-action (ga &optional default-alist)
+(defun dereference-action (ga &optional
+                                default-alist
+                                ignored-objects)
   (flet ((w/not (list) (mapcar (lambda (x) `(not ,x)) list)))
     (ematch ga
       ((pddl-ground-action domain
@@ -43,18 +65,32 @@
                            delete-list)
        (let ((alist
               (if default-alist
-                  (mapcar (lambda (o) (assoc o default-alist)) parameters)
-                  (dereference-parameters parameters))))
+                  (mapcar (lambda (o) (assoc o default-alist))
+                          parameters)
+                  (dereference-parameters
+                   parameters ignored-objects))))
          (values
           (pddl-action
            :domain domain
            :name name
-           :parameters (mapcar #'cdr alist)
+           :parameters
+           (if default-alist
+               ;; if the default-alist is non-nil, it means that this
+               ;; action is not a macro-action, but a partially grounded
+               ;; action instantiated for decoding the macro-action later.
+               (mapcar #'cdr alist)
+               ;; if the default-alist is nil, this action is a
+               ;; macro-action. Remove ignored-objects, and suppress the
+               ;; explosion during the translation.
+               (iter (for (orig . var) in alist)
+                     (unless (find orig ignored-objects)
+                       (collect var))))
            :precondition `(and
+                           ;; the precondition may be partially grounded
                            ,@(dereference-predicates
                               alist positive-preconditions))
-           ;; do not assume action-costs currently
            :effect
+           ;; the effects may be partially grounded
            `(and ,@(dereference-predicates alist add-list)
                  ,@(w/not (dereference-predicates alist delete-list))
                  ,@(dereference-assign-ops alist assign-ops)))
