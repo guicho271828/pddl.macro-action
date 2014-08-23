@@ -65,9 +65,7 @@
                            add-list
                            delete-list)
        (let ((alist
-              (if default-alist
-                  (mapcar (lambda (o) (assoc o default-alist))
-                          parameters)
+              (or default-alist
                   (dereference-parameters
                    parameters ignored-objects))))
          (values
@@ -79,9 +77,13 @@
                ;; if the default-alist is non-nil, it means that this
                ;; action is not a macro-action, but a partially grounded
                ;; action instantiated for decoding the macro-action later.
-               (mapcar #'cdr alist)
-               ;; if the default-alist is nil, this action is a
-               ;; macro-action. Remove ignored-objects, and suppress the
+               ;; The partially dereferenced action 
+               (mapcar (lambda (p) (cdr (assoc p alist))) parameters)
+               ;; If the default-alist is nil, this action is a
+               ;; macro-action. It should remove the ignored-objects from
+               ;; the alist. Otherwise, the parameter list in the domain
+               ;; description contains a constant, resulting in an
+               ;; infeasible PDDL description. Also, it suppress the
                ;; explosion during the translation.
                (iter (for (orig . var) in alist)
                      (unless (find orig ignored-objects)
