@@ -15,10 +15,8 @@
 
 (defun dereference-parameters (objs ignored) ; -> alist
   (append
-   (mapcar #'dereference-parameter-as-constant
-           (intersection objs ignored))
-   (mapcar #'dereference-parameter
-           (set-difference objs ignored))))
+   (mapcar #'dereference-parameter-as-constant ignored)
+   (mapcar #'dereference-parameter (set-difference objs ignored))))
 
 (defun dereference-parameter (o)
   (ematch o
