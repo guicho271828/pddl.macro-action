@@ -36,7 +36,7 @@ domain due to the object grounding."
                          (alist m) :key #'cdr)))
 
 (defun originals (m)
-  "Return a list of objects and constants that should be moved from the
+  "Return a list of objects (and constants) that should be removed from the
 problem to the enhanced domain due to the object grounding."
   (mapcar #'car
           (remove-if-not (lambda (x) (typep x 'pddl-constant))

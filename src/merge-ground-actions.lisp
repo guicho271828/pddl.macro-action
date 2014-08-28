@@ -34,8 +34,10 @@ actions ga1 and ga2, where ga1 is followed by ga2. "
              :precondition `(and ,@(s/union pre1 (s/diff pre2 a1)))
              ;; do not assume action-costs currently
              :effect
-             (let ((add-maybe-duplicated (s/union (s/diff a1 d2) (s/diff a2 d1)))
-                   (del-maybe-duplicated (s/union (s/diff d1 a2) (s/diff d2 a1))))
+             (let (;; (add-maybe-duplicated (s/union (s/diff a1 d2) (s/diff a2 d1)))
+                   ;; (del-maybe-duplicated (s/union (s/diff d1 a2) (s/diff d2 a1)))
+                   (add-maybe-duplicated (s/union (s/diff a1 d2) a2))
+                   (del-maybe-duplicated (s/union (s/diff d1 a2) d2)))
                `(and ,@add-maybe-duplicated
                      ,@(w/not del-maybe-duplicated)
                      ,@ops1 ;; multiple assign-ops are allowed cf. pddl3.1
