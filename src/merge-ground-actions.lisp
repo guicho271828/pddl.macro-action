@@ -29,7 +29,10 @@ actions ga1 and ga2, where ga1 is followed by ga2. "
                             (declare (ignore c))
                             (invoke-restart (find-restart 'ignore)))))
             (pddl-ground-action
-             :name (symbolicate n1 '- n2)
+             :name (let ((str (format nil "~a-~a" n1 n2)))
+                     (if (< 30 (length str))
+                         (gensym (subseq str 0 29))
+                         (gensym str)))
              :parameters (union objs1 objs2)
              :precondition `(and ,@(s/union pre1 (s/diff pre2 a1)))
              ;; do not assume action-costs currently
