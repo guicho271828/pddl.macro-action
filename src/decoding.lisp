@@ -10,13 +10,17 @@
                       :parameters (guard vars (= (length vars)
                                                  (length objects)))
                       :actions actions)
+        (format t "~&Decoding action ~a" name)
         (flet ((obj (var)
                  ;; alist type is
                  ;; (object . variable), (constant . variable),
                  ;; (object . constant) or (constant . constant)
                  ;; so the query is the cdr part: a variable or a constant.
                  (ematch var
-                   ((pddl-constant)
+                   ;; 9/7 added pddl-object in the first clause
+                   ;; this is for adopting "always grounded" strategy of
+                   ;; macro composition.
+                   ((or (pddl-object) (pddl-constant))
                     ;; when the pair is (* . c), then the variable is
                     ;; grounded and does not appear in `vars' and
                     ;; its instantiation does not appear in `objects' either.
