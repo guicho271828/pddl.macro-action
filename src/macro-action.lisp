@@ -4,6 +4,8 @@
 (define-pddl-class macro-action (pddl-action)
   ((actions :type list :initarg :actions :initform nil)
    (alist :type list :initarg :alist :initform nil)))
+(define-pddl-class ground-macro-action (macro-action pddl-ground-action)
+  ())
 
 (defun macro-action (actions &optional ign/objs)
   "Merge the given ground-action, dereference them, then re-instantiate as
@@ -15,7 +17,11 @@ If the argument `actions' is #(), returns nil."
     (multiple-value-bind (result alist)
         (handler-bind ((warning #'muffle-warning))
           (dereference-action
-           (reduce #'merge-ground-actions actions)
+           (ematch actions
+             ((vector (and a (pddl-ground-action name)))
+              (shallow-copy a :name (gensym (symbol-name name))))
+             ((type vector)
+              (reduce #'merge-ground-actions actions)))
            nil ign/objs))
       (values
        (change-class

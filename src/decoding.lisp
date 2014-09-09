@@ -33,6 +33,8 @@
           (iter (for pa in actions)
                 ;; these actions are partially grounded, so the parameters
                 ;; may contain objects.
+                ;; NOTE: when the macros are grounded,
+                ;;  these are fully grounded and the parameters might be nil.
                 (collecting
                  (ground-action pa (mapcar #'obj (parameters pa)))))))
        ((macro-action) (list ground-action))))))
