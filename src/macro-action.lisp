@@ -10,8 +10,10 @@
 (defun macro-action (actions &optional ign/objs)
   "Merge the given ground-action, dereference them, then re-instantiate as
 a macro-action. The secondary value `alist' is an association list
-of (object . variable) or (constant . variable) if objects are not in the ignore list,
- and (object . constant) or (constant . constant) if they are in the ignore list.
+of (object . variable) or (constant . variable)
+ if objects are not in the ignore list (== member of abstract component),
+ and (object . constant) or (constant . constant)
+ if they are in the ignore list (== environment object).
 If the argument `actions' is #(), returns nil."
   (unless (zerop (length actions))
     (multiple-value-bind (result alist)
