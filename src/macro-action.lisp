@@ -7,6 +7,25 @@
 (define-pddl-class ground-macro-action (macro-action pddl-ground-action)
   ())
 
+(defun macro-action (actions arguments)
+  (let ((merged (ematch actions
+                  ((vector (and a (pddl-ground-action name)))
+                   (shallow-copy a :name (gensym (symbol-name name))))
+                  ((type vector)
+                   (reduce #'merge-ground-actions actions))))
+        ;; (params (mapcar #'dereference-parameter arguments))
+        )
+    (change-class
+     merged
+     'macro-action
+     :parameters arguments ;; (mapcar #'cdr params)
+     :actions actions
+     :alist (mapcar (lambda (x) (cons x x)) arguments) ;; params
+     )))
+
+
+
+#+nil
 (defun macro-action (actions &optional ign/objs)
   "Merge the given ground-action, dereference them, then re-instantiate as
 a macro-action. The secondary value `alist' is an association list
@@ -35,14 +54,14 @@ If the argument `actions' is #(), returns nil."
                       actions))
        alist))))
 
-
+#+nil
 (defmethod constants ((m macro-action))
   "Return a list of constants that should be introduced in the enhanced
 domain due to the object grounding."
   (mapcar #'cdr
           (remove-if-not (lambda (x) (typep x 'pddl-constant))
                          (alist m) :key #'cdr)))
-
+#+nil
 (defun originals (m)
   "Return a list of objects (and constants) that should be removed from the
 problem to the enhanced domain due to the object grounding."

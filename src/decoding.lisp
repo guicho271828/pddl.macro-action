@@ -30,7 +30,7 @@
                     ;; or it is a variable.  it will be in the same
                     ;; position in `objects' as var is in vars.
                     (nth (position var vars) objects)))))
-          (iter (for pa in actions)
+          (iter (for pa in-vector actions)
                 ;; these actions are partially grounded, so the parameters
                 ;; may contain objects.
                 ;; NOTE: when the macros are grounded,
