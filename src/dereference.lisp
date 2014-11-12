@@ -112,9 +112,10 @@
 
 (defun dereference-assign-op (alist ground-assign-op)
   (ematch ground-assign-op
-    ((pddl-ground-assign-op value-form place)
+    ((pddl-ground-assign-op value-form place increase)
      (pddl-assign-op :value-form (dereference-f-exp alist value-form)
-                     :place (dereference-predicate alist place)))))
+                     :place (dereference-predicate alist place)
+                     :increase (dereference-f-exp alist place)))))
 
 (defun dereference-f-exp (alist f-exp)
   "Dereferences each f-head in a f-exp tree."
