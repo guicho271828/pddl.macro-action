@@ -7,10 +7,14 @@
 (define-pddl-class ground-macro-action (macro-action pddl-ground-action)
   ())
 
+(declaim (ftype (function ((vector pddl-ground-action) list) macro-action)
+                macro-action))
 (defun macro-action (actions arguments)
   (let ((merged (ematch actions
+                  ;; 1 element
                   ((vector (and a (pddl-ground-action name)))
                    (shallow-copy a :name (gensym (symbol-name name))))
+                  ;; more elements
                   ((type vector)
                    (reduce #'merge-ground-actions actions))))
         ;; (params (mapcar #'dereference-parameter arguments))

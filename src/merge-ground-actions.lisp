@@ -2,8 +2,9 @@
 
 (in-package :pddl.macro-action)
 
+(declaim (ftype (function (pddl-ground-action pddl-ground-action) pddl-ground-action) merge-ground-actions))
 (defun merge-ground-actions (ga1 ga2)
-  "Reference implimatation as in Macro-FF paper, Botea et. al., JAIR 2005, Figure 8.
+  "Reference implematation as in Macro-FF paper, Botea et. al., JAIR 2005, Figure 8.
 Creates a new ground-action that is a result of merging consequtive two
 actions ga1 and ga2, where ga1 is followed by ga2. "
   (flet ((s/union (set1 set2) (union set1 set2 :test #'eqstate))
