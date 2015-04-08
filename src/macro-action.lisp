@@ -27,6 +27,27 @@
      :alist (mapcar (lambda (x) (cons x x)) arguments) ;; params
      )))
 
+(declaim (ftype (function ((vector pddl-ground-action) list) ground-macro-action)
+                ground-macro-action))
+(defun ground-macro-action (actions arguments)
+  (let ((merged (ematch actions
+                  ;; 1 element
+                  ((vector (and a (pddl-ground-action name)))
+                   (shallow-copy a :name (gensym (symbol-name name))))
+                  ;; more elements
+                  ((type vector)
+                   (reduce #'merge-ground-actions actions))))
+        ;; (params (mapcar #'dereference-parameter arguments))
+        )
+    (change-class
+     merged
+     'ground-macro-action
+     :problem (problem (elt actions 0))
+     :parameters arguments ;; (mapcar #'cdr params)
+     :actions actions
+     :alist (mapcar (lambda (x) (cons x x)) arguments) ;; params
+     )))
+
 
 
 #+nil
