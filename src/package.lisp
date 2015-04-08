@@ -13,7 +13,8 @@
    :macro-action
    :decode-plan
    :originals
-   :ground-macro-action))
+   :ground-macro-action
+   :zero-length-plan))
 (in-package :pddl.macro-action)
 
 ;; blah blah blah.
