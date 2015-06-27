@@ -88,9 +88,9 @@
       (is (= 1 (length (parameters m))))
       (is (= 5 (length alist)))
       (print (actions m))
-      (is (= 4 (length (originals m))))
-      (is (= 4 (length (constants m))))
-      (iter (for pa in (actions m)) ; partial action
+      (is (= 4 (length (objects-in-macro m))))
+      (is (= 4 (length (constants-in-macro m))))
+      (iter (for pa in-vector (actions m)) ; partial action
             (is (= 3 (length (parameters pa)))))
       (let* ((truck (object *problem* :t1))
              (*domain*

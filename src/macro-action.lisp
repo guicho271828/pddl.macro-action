@@ -85,15 +85,14 @@ If the argument `actions' is #(), returns nil."
                       actions))
        alist))))
 
-#+nil
-(defmethod constants ((m macro-action))
+(defun constants-in-macro (m)
   "Return a list of constants that should be introduced in the enhanced
 domain due to the object grounding."
   (mapcar #'cdr
           (remove-if-not (lambda (x) (typep x 'pddl-constant))
                          (alist m) :key #'cdr)))
-#+nil
-(defun originals (m)
+
+(defun objects-in-macro (m)
   "Return a list of objects (and constants) that should be removed from the
 problem to the enhanced domain due to the object grounding."
   (mapcar #'car

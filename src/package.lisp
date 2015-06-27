@@ -14,7 +14,9 @@
    :decode-plan
    :originals
    :ground-macro-action
-   :zero-length-plan))
+   :zero-length-plan
+   :constants-in-macro
+   :objects-in-macro))
 (in-package :pddl.macro-action)
 
 ;; blah blah blah.
