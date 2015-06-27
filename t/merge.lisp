@@ -37,6 +37,7 @@
     (flet ((ground-action (&rest args)
              (handler-bind ((error
                              (lambda (c)
+                               (declare (ignore c))
                                (when-let ((r (find-restart 'ignore)))
                                  (invoke-restart r)))))
                (apply #'ground-action args))))
@@ -122,12 +123,14 @@
                       (object *problem* :c)))
          (ga1 (ground-action (action *domain* :move) args1))
          (ga2 (ground-action (action *domain* :move) args2))
+         #+nil
          (result (reduce (inv #'apply-ground-action)
                          (list ga1 ga2)
                          :initial-value (init *problem*))))
     (flet ((ground-action (&rest args)
              (handler-bind ((error
                              (lambda (c)
+                               (declare (ignore c))
                                (when-let ((r (find-restart 'ignore)))
                                  (invoke-restart r)))))
                (apply #'ground-action args))))

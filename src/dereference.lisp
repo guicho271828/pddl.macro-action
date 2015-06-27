@@ -112,7 +112,7 @@
 
 (defun dereference-assign-op (alist ground-assign-op)
   (ematch ground-assign-op
-    ((pddl-ground-assign-op value-form place increase)
+    ((pddl-ground-assign-op value-form place #+nil increase)
      (pddl-assign-op :value-form (dereference-f-exp alist value-form)
                      :place (dereference-predicate alist place)
                      :increase (dereference-f-exp alist place)))))
