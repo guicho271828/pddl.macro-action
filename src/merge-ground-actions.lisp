@@ -16,6 +16,7 @@ actions ga1 and ga2, where ga1 is followed by ga2. "
         :problem problem
         :name n1 :parameters objs1
         :positive-preconditions pre1
+        :negative-preconditions neg1
         :assign-ops ops1
         :add-list a1
         :delete-list d1)
@@ -23,6 +24,7 @@ actions ga1 and ga2, where ga1 is followed by ga2. "
          ((pddl-ground-action
            :name n2 :parameters objs2
            :positive-preconditions pre2
+           :negative-preconditions neg2
            :assign-ops ops2
            :add-list a2
            :delete-list d2)
@@ -38,7 +40,9 @@ actions ga1 and ga2, where ga1 is followed by ga2. "
                          (gensym (subseq str 0 29))
                          (gensym str)))
              :parameters (union objs1 objs2)
-             :precondition `(and ,@(s/union pre1 (s/diff pre2 a1)))
+             :precondition `(and ,@(s/union pre1 (s/diff pre2 a1))
+                                 ,@(w/not
+                                    (s/union neg1 (s/diff neg2 d1))))
              ;; do not assume action-costs currently
              :effect
              (let (;; (add-maybe-duplicated (s/union (s/diff a1 d2) (s/diff a2 d1)))
