@@ -12,7 +12,8 @@ actions ga1 and ga2, where ga1 is followed by ga2. "
          (w/not (list) (mapcar (lambda (x) `(not ,x)) list)))
     (ematch ga1
       ((pddl-ground-action
-        :problem *problem*
+        :domain domain
+        :problem problem
         :name n1 :parameters objs1
         :positive-preconditions pre1
         :assign-ops ops1
@@ -30,6 +31,8 @@ actions ga1 and ga2, where ga1 is followed by ga2. "
                             (declare (ignore c))
                             (invoke-restart (find-restart 'ignore)))))
             (pddl-ground-action
+             :domain domain
+             :problem problem
              :name (let ((str (format nil "~a-~a" n1 n2)))
                      (if (< 30 (length str))
                          (gensym (subseq str 0 29))

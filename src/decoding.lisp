@@ -41,9 +41,12 @@
 
 (defun decode-plan (macro plan)
   (match plan
-    ((pddl-plan actions)
-     (pddl-plan ; newly create a pddl-plan, not shallow-copy, so that it
-      :actions  ; uses the current special binding of *domain* and
-                ; *problem*
-      (apply #'concatenate 'vector
-             (map 'list (curry #'decode-action macro) actions))))))
+    ((pddl-plan actions (problem eproblem-mod) (domain edomain-mod))
+     (pddl-plan
+      :problem eproblem-mod
+      :domain edomain-mod
+      :actions
+      (let ((*problem* eproblem-mod)
+            (*domain* edomain-mod))
+        (apply #'concatenate 'vector
+               (map 'list (curry #'decode-action macro) actions)))))))
