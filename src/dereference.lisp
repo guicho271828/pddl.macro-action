@@ -13,12 +13,12 @@
 ;; domain.
 ;; when (constant . constant), then they are NOT eq.
 
-(defun dereference-parameters (objs ignored) ; -> alist
+(defun lift-parameters (objs &optional objs-to-be-constant) ; -> alist
   (append
-   (mapcar #'dereference-parameter-as-constant ignored)
-   (mapcar #'dereference-parameter (set-difference objs ignored))))
+   (mapcar #'lift-parameter-as-constant objs-to-be-constant)
+   (mapcar #'lift-parameter-as-variable (set-difference objs objs-to-be-constant))))
 
-(defun dereference-parameter (o)
+(defun lift-parameter-as-variable (o)
   (ematch o
     ((pddl-variable domain type)
      ;; the o might be a pddl-object or a pddl-constant
@@ -30,13 +30,18 @@
                                   (symbol-name (name type))))
                           :type type)))))
 
-(defun dereference-parameter-as-constant (o)
+(defun lift-parameter-as-constant (o)
   (cons o (change-class (shallow-copy o) 'pddl-constant)))
 
-(defun dereference-predicates (alist fs)
-  (mapcar (curry #'dereference-predicate alist) fs))
-(defun dereference-predicate (alist f)
-  (flet ((var (o)
+(define-condition parameter-not-found (error)
+  ((parameter :initarg :parameter :reader parameter))
+  (:report (lambda (c s)
+             (format s "Parameter ~a not found" (parameter c)))))
+
+(defun lift-predicates (alist fs)
+  (mapcar (curry #'lift-predicate alist) fs))
+(defun lift-predicate (alist f)
+  (labels ((var (o)
            ;; it is called var, but actually it may return the ignored
            ;; objects
            (or (when-let ((pair (assoc o alist))) (cdr pair))
@@ -49,80 +54,91 @@
                         Currently we don't treat it as an error."
                        o (type o))
                  o)
-               (error "Parameter ~a not found" o))))
+               (error 'parameter-not-found :parameter o))))
     (match f
-      ((pddl-atomic-state name parameters)
+      ((pddl-atomic-state domain name parameters)
        (pddl-predicate
+        :domain domain
         :name name
         :parameters (mapcar #'var parameters)))
-      ((pddl-function-state name parameters type)
+      ((pddl-function-state domain name parameters type)
        (pddl-function
+        :domain domain
         :name name :type type
         :parameters (mapcar #'var parameters))))))
 
-(defun dereference-action (ga &optional
-                                default-alist
-                                ignored-objects)
+(defun lift-action (ga &optional default-alist)
+  "Lift a ground action GA.
+It completely lifts all parameters of the ground action.
+Unless default-alist is given, it creates a new object-variable bindings.
+If it is given, then it overrides the default, which is useful when
+lifting the underlying actions of a macro action."
   (flet ((w/not (list) (mapcar (lambda (x) `(not ,x)) list)))
-    (ematch ga
-      ((pddl-ground-action domain
-                           name parameters
-                           assign-ops
-                           positive-preconditions
-                           add-list
-                           delete-list)
-       (let ((alist
-              (or default-alist
-                  (dereference-parameters
-                   parameters ignored-objects))))
-         (values
-          (pddl-action
-           :domain domain
-           :name name
-           :parameters
-           (if default-alist
-               ;; if the default-alist is non-nil, it means that this
-               ;; action is not a macro-action, but a partially grounded
-               ;; action instantiated for decoding the macro-action later.
-               ;; The number of parameters should be = to that
-               ;; of the original action.
-               (mapcar (lambda (p) (cdr (assoc p alist))) parameters)
-               ;; If the default-alist is nil, this action is a
-               ;; macro-action. It should remove the ignored-objects from
-               ;; the alist. Otherwise, the parameter list in the domain
-               ;; description contains a constant, resulting in an
-               ;; infeasible PDDL description. Also, it causes the
-               ;; explosion during the translation.
-               (iter (for (orig . var) in alist)
-                     (unless (find orig ignored-objects)
-                       (collect var))))
-           :precondition `(and
-                           ;; the precondition may be partially grounded
-                           ,@(dereference-predicates
-                              alist positive-preconditions))
-           :effect
-           ;; the effects may be partially grounded
-           `(and ,@(dereference-predicates alist add-list)
-                 ,@(w/not (dereference-predicates alist delete-list))
-                 ,@(dereference-assign-ops alist assign-ops)))
-          (or default-alist alist)))))))
+    (prog* ((parameters (parameters ga))
+            (alist (or default-alist (lift-parameters parameters))))
+      start
+      (return
+        (restart-case
+            (macrolet ((result (class &rest args)
+                         `(,class :domain domain
+                                  :name name
+                                  :precondition `(and ,@(lift-predicates alist positive-preconditions)
+                                                      ,@(w/not (lift-predicates alist negative-preconditions))
+                                                      ,@(w/not (unequals newparams domain)))
+                                  :parameters newparams
+                                  :effect `(and ,@(lift-predicates alist add-list)
+                                                ,@(w/not (lift-predicates alist delete-list))
+                                                ,@(lift-assign-ops alist assign-ops))
+                                  ,@args)))
+              (ematch ga
+                ((ground-macro-action domain name actions
+                                      positive-preconditions negative-preconditions
+                                      add-list delete-list assign-ops)
+                 (let ((newparams (mapcar #'cdr alist)
+                         #+nil (mapcar (lambda (p) (cdr (assoc p alist))) parameters)))
+                   (result macro-action
+                           :actions (map 'vector (lambda (ga) (lift-action ga alist)) actions))))
+                ((pddl-ground-action domain name
+                                     positive-preconditions negative-preconditions
+                                     add-list delete-list assign-ops)
+                 (let ((newparams (mapcar (lambda (p) (cdr (assoc p alist))) parameters)))
+                   (result pddl-action)))))
+          (ground (c)
+            (push (lift-parameter-as-constant (parameter c)) alist)
+            (go start))
+          (lift (c)
+            (push (lift-parameter-as-variable (parameter c)) alist)
+            (go start)))))))
 
-(defun dereference-assign-ops (alist ground-assign-ops)
-  (mapcar (curry #'dereference-assign-op alist) ground-assign-ops))
+(defun unequals (params domain)
+  (iter outer
+        (for p1 in params)
+        (iter (for p2 in params)
+              (unless (eq p1 p2)
+                (in outer
+                    (collect
+                        (pddl-predicate
+                         :domain domain
+                         :name 'equal
+                         :parameters (list p1 p2))))))))
 
-(defun dereference-assign-op (alist ground-assign-op)
+(defun lift-assign-ops (alist ground-assign-ops)
+  (mapcar (curry #'lift-assign-op alist) ground-assign-ops))
+
+(defun lift-assign-op (alist ground-assign-op)
   (ematch ground-assign-op
-    ((pddl-ground-assign-op value-form place #+nil increase)
-     (pddl-assign-op :value-form (dereference-f-exp alist value-form)
-                     :place (dereference-predicate alist place)
-                     :increase (dereference-f-exp alist place)))))
+    ((pddl-ground-assign-op domain value-form place #+nil increase)
+     (pddl-assign-op :domain domain
+                     :value-form (lift-f-exp alist value-form)
+                     :place (lift-predicate alist place)
+                     :increase (lift-f-exp alist place)))))
 
-(defun dereference-f-exp (alist f-exp)
-  "Dereferences each f-head in a f-exp tree."
+(defun lift-f-exp (alist f-exp)
+  "Lifts each f-head in a f-exp tree."
   (labels ((rec (e)
              (ematch e
                ((list* (and op (or '+ '- '* '/)) fexps)
                 (list* op (mapcar #'rec fexps)))
                ((type number) e)
-               (_ (dereference-predicate alist e)))))
+               (_ (lift-predicate alist e)))))
     (rec f-exp)))
