@@ -127,11 +127,11 @@ lifting the underlying actions of a macro action."
 
 (defun lift-assign-op (alist ground-assign-op)
   (ematch ground-assign-op
-    ((pddl-ground-assign-op domain value-form place #+nil increase)
+    ((pddl-ground-assign-op domain value-form place increase)
      (pddl-assign-op :domain domain
                      :value-form (lift-f-exp alist value-form)
                      :place (lift-predicate alist place)
-                     :increase (lift-f-exp alist place)))))
+                     :increase (lift-f-exp alist increase)))))
 
 (defun lift-f-exp (alist f-exp)
   "Lifts each f-head in a f-exp tree."
