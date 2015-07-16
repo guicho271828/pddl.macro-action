@@ -9,7 +9,7 @@
 
 (define-condition zero-length-plan (error) ())
 
-(defun ground-macro-action (actions arguments)
+(defun ground-macro-action (actions)
   (let ((merged (ematch actions
                   ((vector)
                    (error 'zero-length-plan))
@@ -23,9 +23,8 @@
      merged
      'ground-macro-action
      :problem (problem (elt actions 0))
-     :parameters arguments
      :actions actions
-     :alist (mapcar (lambda (x) (cons x x)) arguments))))
+     :alist (mapcar (lambda (x) (cons x x)) (parameters merged)))))
 
 (defun constants-in-macro (m)
   "Return a list of constants that should be introduced in the enhanced
