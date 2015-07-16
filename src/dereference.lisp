@@ -75,7 +75,10 @@ If it is given, then it overrides the default, which is useful when
 lifting the underlying actions of a macro action."
   (flet ((w/not (list) (mapcar (lambda (x) `(not ,x)) list)))
     (prog* ((parameters (parameters ga))
-            (alist (or default-alist (lift-parameters parameters))))
+            (alist (if default-alist
+                       (dolist (p parameters default-alist)
+                         (assert (assoc p default-alist)))
+                       (lift-parameters parameters))))
       start
       (return
         (restart-case
@@ -94,14 +97,18 @@ lifting the underlying actions of a macro action."
                 ((ground-macro-action domain name actions
                                       positive-preconditions negative-preconditions
                                       add-list delete-list assign-ops)
-                 (let ((newparams (mapcar #'cdr alist)
-                         #+nil (mapcar (lambda (p) (cdr (assoc p alist))) parameters)))
+                 (let ((newparams (mapcar #'cdr alist)))
                    (result macro-action
                            :actions (map 'vector (lambda (ga) (lift-action ga alist)) actions))))
                 ((pddl-ground-action domain name
                                      positive-preconditions negative-preconditions
                                      add-list delete-list assign-ops)
-                 (let ((newparams (mapcar (lambda (p) (cdr (assoc p alist))) parameters)))
+                 (let ((newparams
+                        (mapcar (lambda (o)
+                                  (let ((p (cdr (assoc o alist))))
+                                    (assert p nil "~a not found in ~a" o alist)
+                                    p))
+                                parameters)))
                    (result pddl-action)))))
           (ground (c)
             (push (lift-parameter-as-constant (parameter c)) alist)

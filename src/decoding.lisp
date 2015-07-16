@@ -29,7 +29,9 @@
                    ((pddl-variable)
                     ;; or it is a variable.  it will be in the same
                     ;; position in `objects' as var is in vars.
-                    (nth (position var vars) objects)))))
+                    (let ((pos (position var vars)))
+                      (assert pos)
+                      (nth pos objects))))))
           (iter (for pa in-vector actions)
                 ;; these actions are partially grounded, so the parameters
                 ;; may contain objects.
