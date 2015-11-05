@@ -37,6 +37,7 @@
     (flet ((ground-action (&rest args)
              (handler-bind ((error
                              (lambda (c)
+                               (declare (ignore c))
                                (when-let ((r (find-restart 'ignore)))
                                  (invoke-restart r)))))
                (apply #'ground-action args))))
@@ -56,14 +57,14 @@
                    :test #'eqstate))))
 
 (test (macro-action :fixture check-macro)
-  (multiple-value-bind (m alist) (macro-action (list ga1 ga2))
+  (multiple-value-bind (m alist) (macro-action (vector ga1 ga2) nil)
     (is (set-equal result
                    (apply-ground-action (ground-action m (mapcar #'car alist))
                                         (init *problem*))
                    :test #'eqstate))))
 
 (test (decode-macro :fixture check-macro)
-  (multiple-value-bind (m alist) (macro-action (list ga1 ga2))
+  (multiple-value-bind (m alist) (macro-action (vector ga1 ga2) nil)
     (let* ((gm (ground-action m (mapcar #'car alist)))
            (decoded-actions (pddl.macro-action::decode-action m gm)))
       (is (= 2 (length decoded-actions)))
@@ -81,15 +82,15 @@
                        (object *problem* :c)
                        (object *problem* :d))))
     (multiple-value-bind (m alist)
-        (macro-action (list ga1 ga2) env-obj)
+        (macro-action (vector ga1 ga2) env-obj)
       (print m)
       (print alist)
       (is (= 1 (length (parameters m))))
       (is (= 5 (length alist)))
       (print (actions m))
-      (is (= 4 (length (originals m))))
-      (is (= 4 (length (constants m))))
-      (iter (for pa in (actions m)) ; partial action
+      (is (= 4 (length (objects-in-macro m))))
+      (is (= 4 (length (constants-in-macro m))))
+      (iter (for pa in-vector (actions m)) ; partial action
             (is (= 3 (length (parameters pa)))))
       (let* ((truck (object *problem* :t1))
              (*domain*
@@ -122,12 +123,14 @@
                       (object *problem* :c)))
          (ga1 (ground-action (action *domain* :move) args1))
          (ga2 (ground-action (action *domain* :move) args2))
+         #+nil
          (result (reduce (inv #'apply-ground-action)
                          (list ga1 ga2)
                          :initial-value (init *problem*))))
     (flet ((ground-action (&rest args)
              (handler-bind ((error
                              (lambda (c)
+                               (declare (ignore c))
                                (when-let ((r (find-restart 'ignore)))
                                  (invoke-restart r)))))
                (apply #'ground-action args))))
@@ -135,7 +138,7 @@
                            (object *problem* :b)
                            (object *problem* :c))))
         (multiple-value-bind (m alist)
-            (macro-action (list ga1 ga2) env-obj)
+            (macro-action (vector ga1 ga2) env-obj)
           (print alist)
           (let* ((truck (object *problem* :t1))
                  (newconst (append (mapcar (lambda (x) (cdr (assoc x alist)))

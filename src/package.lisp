@@ -14,7 +14,13 @@
    :decode-plan
    :originals
    :ground-macro-action
-   :zero-length-plan))
+   :zero-length-plan
+   :constants-in-macro
+   :objects-in-macro
+   :lift-action
+   :parameter-not-found
+   :lift
+   :ground))
 (in-package :pddl.macro-action)
 
 ;; blah blah blah.
