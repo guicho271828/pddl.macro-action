@@ -23,11 +23,11 @@
   :depends-on (:iterate :alexandria :pddl :trivia :guicho-utilities)
   :components ((:module "src"
                 :components
-                ((:file "package")
-                 (:file "merge-ground-actions")
-                 (:file "macro-action")
-                 (:file "dereference")
-                 (:file :decoding))
+                ((:file :0-package)
+                 (:file :1-merge-ground-actions)
+                 (:file :2-macro-action)
+                 (:file :3-dereference)
+                 (:file :4-decoding))
                 :serial t))
   :description ""
   
