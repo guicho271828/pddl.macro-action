@@ -19,6 +19,4 @@
                 :components
                 ((:file "package")
                  (:file "merge"))))
-  :perform (load-op :after (op c) (PROGN
- (EVAL (READ-FROM-STRING "(fiveam:run! :pddl.macro-action)"))
- (CLEAR-SYSTEM C))))
+  :perform (test-op :after (op c) (eval (read-from-string "(fiveam:run! :pddl.macro-action)"))))

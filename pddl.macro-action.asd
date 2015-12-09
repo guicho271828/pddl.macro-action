@@ -44,4 +44,4 @@
           (setf (fill-pointer seq) (read-sequence seq stream))
           seq)))
   
-  :in-order-to ((test-op (load-op pddl.macro-action.test))))
+  :in-order-to ((test-op (test-op pddl.macro-action.test))))
