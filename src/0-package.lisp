@@ -5,7 +5,7 @@
 
 (in-package :cl-user)
 (defpackage pddl.macro-action
-  (:use :cl :pddl :iterate :alexandria :optima
+  (:use :cl :pddl :iterate :alexandria :trivia
         :guicho-utilities)
   (:shadowing-import-from :iterate :maximize :minimize)
   (:export

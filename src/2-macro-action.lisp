@@ -2,7 +2,7 @@
 (in-package :pddl.macro-action)
 
 (define-pddl-class macro-action (pddl-action)
-  ((actions :type list :initarg :actions :initform nil)
+  ((actions :type vector :initarg :actions :initform nil)
    (alist :type list :initarg :alist :initform nil)))
 (define-pddl-class ground-macro-action (macro-action pddl-ground-action)
   ())
@@ -22,7 +22,6 @@
     (change-class
      merged
      'ground-macro-action
-     :problem (problem (elt actions 0))
      :actions actions
      :alist (mapcar (lambda (x) (cons x x)) (parameters merged)))))
 
