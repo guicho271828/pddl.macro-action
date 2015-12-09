@@ -22,7 +22,6 @@
     (change-class
      merged
      'ground-macro-action
-     :problem (problem (elt actions 0))
      :actions actions
      :alist (mapcar (lambda (x) (cons x x)) (parameters merged)))))
 
