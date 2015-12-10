@@ -57,10 +57,22 @@
                    :test #'eqstate))))
 
 (test (macro-action :fixture check-macro)
-  (is (set-equal result
-                 (apply-ground-action (ground-macro-action (vector ga1 ga2))
-                                      (init *problem*))
-                 :test #'eqstate)))
+  (let ((gm (ground-macro-action (vector ga1 ga2))))
+    (is (set-equal result
+                   (apply-ground-action gm (init *problem*))
+                   :test #'eqstate))
+    (is-false (assign-ops gm))))
+
+(test (add-costs :fixture check-macro)
+  (let ((gm (ground-macro-action (vector ga1 ga2))))
+    (let ((newdomain (shallow-copy *domain*
+                                   :actions (append (actions *domain*)
+                                                    (list gm)))))
+      (let ((cost-domain (add-costs newdomain)))
+        (iter (for a in (actions cost-domain))
+              (if (typep a 'ground-macro-action)
+                  (is (= 2 (increase (first (assign-ops a)))))
+                  (is (= 1 (increase (first (assign-ops a)))))))))))
 
 (test (decode-macro :fixture check-macro)
   (let* ((gm (ground-macro-action (vector ga1 ga2)))
