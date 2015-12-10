@@ -25,6 +25,13 @@
      :actions actions
      :alist (mapcar (lambda (x) (cons x x)) (parameters merged)))))
 
+
+(defun nullary-macro-action (actions)
+  (change-class (shallow-copy (ground-macro-action actions))
+                'macro-action
+                :parameters nil))
+
+
 (defun constants-in-macro (m)
   "Return a list of constants that should be introduced in the enhanced
 domain due to the object grounding."

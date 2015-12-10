@@ -20,7 +20,8 @@
    :lift-action
    :parameter-not-found
    :lift
-   :ground))
+   :ground
+   :nullary-macro-action))
 (in-package :pddl.macro-action)
 
 ;; blah blah blah.
