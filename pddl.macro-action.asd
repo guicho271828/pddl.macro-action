@@ -27,7 +27,8 @@
                  (:file :1-merge-ground-actions)
                  (:file :2-macro-action)
                  (:file :3-dereference)
-                 (:file :4-decoding))
+                 (:file :4-decoding)
+                 (:file :5-add-remove-costs))
                 :serial t))
   :description ""
   
