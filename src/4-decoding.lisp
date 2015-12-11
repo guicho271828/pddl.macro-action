@@ -10,7 +10,7 @@
                       :parameters (guard vars (= (length vars)
                                                  (length objects)))
                       :actions actions)
-        (format t "~&Decoding action ~a" name)
+        (format t "Decoding action ~a~%" name)
         (flet ((obj (var)
                  ;; alist type is
                  ;; (object . variable), (constant . variable),
