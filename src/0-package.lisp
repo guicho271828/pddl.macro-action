@@ -21,7 +21,8 @@
    :parameter-not-found
    :lift
    :ground
-   :nullary-macro-action))
+   :nullary-macro-action
+   :conflict))
 (in-package :pddl.macro-action)
 
 ;; blah blah blah.

@@ -54,3 +54,18 @@ actions ga1 and ga2, where ga1 is followed by ga2. "
                      ,@ops1 ;; multiple assign-ops are allowed cf. pddl3.1
                      ,@ops2))))))))))
 
+(defun conflict (ga1 ga2)
+  "Return true if the precondition of ga2 is deleted by ga1, or the negative precondition of ga1 is added by ga1."
+  (ematch ga1
+    ((pddl-action
+      :add-list a1
+      :delete-list d1)
+     (ematch ga2
+       ((pddl-action
+         :positive-preconditions pre2
+         :negative-preconditions neg2
+         :add-list a2
+         :delete-list d2)
+        (or (intersection a1 neg2 :key #'eqstate)
+            (intersection d1 pre2 :key #'eqstate)))))))
+
