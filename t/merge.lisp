@@ -56,6 +56,14 @@
     (is (set-equal result (apply-ground-action m (init *problem*))
                    :test #'eqstate))))
 
+(test (conflict :fixture check-macro)
+  (let* ((args3 (list (object *problem* :t1)
+                      (object *problem* :a)
+                      (object *problem* :c)))
+         (ga3 (ground-action (action *domain* :move) args3)))
+    (is-true (conflict ga1 ga3))
+    (is-false (conflict ga1 ga2))))
+
 (test (ground-macro-action :fixture check-macro)
   (let ((gm (ground-macro-action (vector ga1 ga2))))
     (is (set-equal result

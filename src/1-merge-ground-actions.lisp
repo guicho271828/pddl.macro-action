@@ -63,9 +63,7 @@ actions ga1 and ga2, where ga1 is followed by ga2. "
      (ematch ga2
        ((pddl-action
          :positive-preconditions pre2
-         :negative-preconditions neg2
-         :add-list a2
-         :delete-list d2)
-        (or (intersection a1 neg2 :key #'eqstate)
-            (intersection d1 pre2 :key #'eqstate)))))))
+         :negative-preconditions neg2)
+        (or (intersection a1 neg2 :test #'eqstate)
+            (intersection d1 pre2 :test #'eqstate)))))))
 
