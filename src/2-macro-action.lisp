@@ -7,6 +7,19 @@
 (define-pddl-class ground-macro-action (macro-action pddl-ground-action)
   ())
 
+(defmethod print-object ((o macro-action) s)
+  (pddl::print-ignoring-unbound-slot
+    (format s "~@<(MAC ~;~a ~_~a ~_~a~;)~:>"
+            (name o)
+            (mapcar #'name (parameters o))
+            (precondition o))))
+
+(defmethod print-object ((o ground-macro-action) s)
+  (pddl::print-ignoring-unbound-slot
+    (format s "~@<(MAC* ~;~a ~_~a~;)~:>"
+            (name o)
+            (mapcar #'name (parameters o)))))
+
 (define-condition zero-length-plan (error) ())
 
 (defun ground-macro-action (actions)
